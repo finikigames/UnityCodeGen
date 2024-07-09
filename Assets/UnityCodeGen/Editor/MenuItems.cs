@@ -6,6 +6,7 @@ namespace UnityCodeGen
     {
         const string MENU_GENERATE = "Tools/UnityCodeGen/Generate";
         const string MENU_TOGGLE_AUTO_GENERATE = "Tools/UnityCodeGen/Auto-generate on Compile";
+        const string MENU_TOGGLE_FORCE_GENERATE = "Tools/UnityCodeGen/Force Generate";
 
         [InitializeOnLoadMethod]
         static void Init()
@@ -24,6 +25,12 @@ namespace UnityCodeGen
         {
             UnityCodeGenSettings.autoGenerateOnCompile = !UnityCodeGenSettings.autoGenerateOnCompile;
             Menu.SetChecked(MENU_TOGGLE_AUTO_GENERATE, UnityCodeGenSettings.autoGenerateOnCompile);
+        }
+
+        [MenuItem(MENU_TOGGLE_FORCE_GENERATE)]
+        static void ToggleAutoGenerate()
+        {
+            ScriptFileGenerator.ForceGenerate();
         }
     }
 }
