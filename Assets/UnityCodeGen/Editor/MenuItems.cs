@@ -28,7 +28,7 @@ namespace UnityCodeGen
         }
 
         [MenuItem(MENU_TOGGLE_FORCE_GENERATE)]
-        static void ToggleAutoGenerate()
+        static void ForceGenerate()
         {
             ScriptFileGenerator.ForceGenerate();
         }
