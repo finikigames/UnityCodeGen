@@ -45,25 +45,29 @@ namespace UnityCodeGen
         internal static void Generate()
         {
             if (isGenerating) return;
+            
+            GenerateCommon();
+        }
+        
+        internal static void GenerateCommon() 
+        {
             isGenerating = true;
-
+            
             // fileNames.Clear();
             var generatorTypes = TypeCache.GetTypesDerivedFrom<ICodeGenerator>()
                 .Where(x => !x.IsAbstract && x.GetCustomAttribute<GeneratorAttribute>() != null);
-
+            
             var changed = false;
-            foreach (var t in generatorTypes)
-            {
-                var generator = (ICodeGenerator)Activator.CreateInstance(t);
+            foreach (var t in generatorTypes) {
+                var generator = (ICodeGenerator) Activator.CreateInstance(t);
                 var context = new GeneratorContext();
                 generator.Execute(context);
-
-                if (GenerateScriptFromContext(context))
-                {
+                
+                if (GenerateScriptFromContext(context)) {
                     changed = true;
                 }
             }
-
+            
             // foreach (var file in Directory.GetFiles(FOLDER_PATH))
             // {
             //     var name = Path.GetFileName(file);
@@ -73,12 +77,16 @@ namespace UnityCodeGen
             //         changed = true;
             //     }
             // }
-
-            if (changed)
-            {
+            
+            if (changed) {
                 AssetDatabase.Refresh();
                 AssetDatabase.SaveAssets();
             }
+        }
+        
+        internal static void ForceGenerate()
+        {
+            GenerateCommon();
         }
 
         static bool GenerateScriptFromContext(GeneratorContext context)
