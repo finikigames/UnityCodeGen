@@ -49,6 +49,43 @@ namespace UnityCodeGen
             GenerateCommon();
         }
         
+        internal static void GenerateByType<T>() where T : class, ICodeGenerator {
+            isGenerating = true;
+            
+            // fileNames.Clear();
+            var generatorTypes = TypeCache.GetTypesDerivedFrom<ICodeGenerator>()
+                .Where(x => !x.IsAbstract && x.GetCustomAttribute<GeneratorAttribute>() != null);
+            
+            var changed = false;
+            foreach (var t in generatorTypes) {
+                var typeOfT = typeof(T);
+                if (typeOfT.FullName != t.FullName) continue;
+                
+                var generator = (ICodeGenerator) Activator.CreateInstance(t);
+                var context = new GeneratorContext();
+                generator.Execute(context);
+                
+                if (GenerateScriptFromContext(context)) {
+                    changed = true;
+                }
+            }
+            
+            // foreach (var file in Directory.GetFiles(FOLDER_PATH))
+            // {
+            //     var name = Path.GetFileName(file);
+            //     if (Path.GetExtension(name) != EXTENSION_META && !fileNames.Contains(name))
+            //     {
+            //         AssetDatabase.DeleteAsset(file);
+            //         changed = true;
+            //     }
+            // }
+            
+            if (changed) {
+                AssetDatabase.Refresh();
+                AssetDatabase.SaveAssets();
+            }
+        }
+        
         internal static void GenerateCommon() 
         {
             isGenerating = true;
