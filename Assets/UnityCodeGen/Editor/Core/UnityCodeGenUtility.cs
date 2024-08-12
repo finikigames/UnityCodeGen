@@ -8,5 +8,9 @@ namespace UnityCodeGen
         {
             ScriptFileGenerator.Generate();
         }
+        
+        public static void GenerateByType<T>() where T : class, ICodeGenerator {
+            ScriptFileGenerator.GenerateByType<T>();
+        }
     }
 }
