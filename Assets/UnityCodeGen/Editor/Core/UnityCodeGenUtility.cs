@@ -12,5 +12,9 @@ namespace UnityCodeGen
         public static void GenerateByType<T>() where T : class, ICodeGenerator {
             ScriptFileGenerator.GenerateByType<T>();
         }
+        
+        public static void GenerateClassByType<T>(IClassConfig config) where T : class, ICodeGenerator{
+            ScriptFileGenerator.GenerateByType<T>(config);
+        }
     }
 }

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.IO;
 using UnityEditor;
+using UnityEngine;
 
 namespace UnityCodeGen
 {
@@ -49,6 +50,40 @@ namespace UnityCodeGen
             GenerateCommon();
         }
         
+        internal static void GenerateClassesByType<T>(string[] classNames) where T : class, ICodeGenerator {
+            foreach (var className in classNames) {
+                GenerateByType<T>(className);
+            }
+        }
+        
+        internal static void GenerateByType<T>(string className) where T : class, ICodeGenerator {
+            isGenerating = true;
+            
+            // fileNames.Clear();
+            var generatorTypes = TypeCache.GetTypesDerivedFrom<ICodeGenerator>()
+                .Where(x => !x.IsAbstract && x.GetCustomAttribute<GeneratorAttribute>() != null);
+            
+            var changed = false;
+            foreach (var t in generatorTypes) {
+                var typeOfT = typeof(T);
+                if (typeOfT.FullName != t.FullName) continue;
+                
+                var generator = (ICodeGenerator) Activator.CreateInstance(t);
+                var context = new GeneratorContext();
+                context.SetContextName(className);
+                generator.Execute(context);
+                
+                if (GenerateScriptFromContext(context)) {
+                    changed = true;
+                }
+            }
+            
+            if (changed) {
+                AssetDatabase.Refresh();
+                AssetDatabase.SaveAssets();
+            }
+        }
+        
         internal static void GenerateByType<T>() where T : class, ICodeGenerator {
             isGenerating = true;
             
@@ -79,6 +114,34 @@ namespace UnityCodeGen
             //         changed = true;
             //     }
             // }
+            
+            if (changed) {
+                AssetDatabase.Refresh();
+                AssetDatabase.SaveAssets();
+            }
+        }
+        
+        internal static void GenerateByType<T>(IClassConfig classConfig) where T : class, ICodeGenerator {
+            isGenerating = true;
+            
+            // fileNames.Clear();
+            var generatorTypes = TypeCache.GetTypesDerivedFrom<ICodeGenerator>()
+                .Where(x => !x.IsAbstract && x.GetCustomAttribute<GeneratorAttribute>() != null);
+            
+            var changed = false;
+            foreach (var t in generatorTypes) {
+                var typeOfT = typeof(T);
+                if (typeOfT.FullName != t.FullName) continue;
+                
+                var generator = (ICodeGenerator) Activator.CreateInstance(t);
+                var context = new GeneratorContext();
+                context.ClassConfig = classConfig;
+                generator.Execute(context);
+                
+                if (GenerateScriptFromContext(context)) {
+                    changed = true;
+                }
+            }
             
             if (changed) {
                 AssetDatabase.Refresh();
